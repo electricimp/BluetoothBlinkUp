@@ -121,15 +121,14 @@ class DevicesTableViewController: UITableViewController, CBCentralManagerDelegat
         // Check for iOS 13 to support dark mode
         if #available(iOS 13.0, *) {
             self.refreshControl!.backgroundColor = UIColor.systemBackground
-            self.refreshControl!.tintColor = UIColor.label
         } else {
             self.refreshControl!.backgroundColor = UIColor.init(red: 0.9,
                                                                 green: 0.9,
                                                                 blue: 0.9,
                                                                 alpha: 1.0)
-            self.refreshControl!.tintColor = UIColor.black
         }
         
+        self.refreshControl!.tintColor = UIColor.init(red: 0.03, green: 0.66, blue: 0.66, alpha: 1.0)
         self.refreshControl!.attributedTitle = NSAttributedString.init(string: "Searching for Bluetooth-enabled imps...",
                                                                        attributes: [ NSAttributedString.Key.foregroundColor : UIColor.black ])
         self.refreshControl!.addTarget(self,
