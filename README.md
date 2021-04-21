@@ -1,4 +1,4 @@
-# Bluetooth BlinkUp 1.3.1 #
+# Bluetooth BlinkUp 1.4.0 #
 
 This example comprises Squirrel code for you to run on an imp-based test device &mdash; this requires impOS™ 38 or above &mdash; and an Xcode project which you can use to build an iOS app (written in Swift 4) that is capable of finding and configuring test devices running the Squirrel code.
 
@@ -38,6 +38,12 @@ Next, click **Assign devices**, toward the bottom the screen. Use the panel that
 
 **Security Note 2** At this time the example code does not support the use of Bluetooth LE security (ie. PIN access and link encryption) We hope to add this in a future release.
 
+### BLE BLinkUp Active Period ###
+
+Version 1.4.0 enforces a BlinkUp availability period as per optical BlinkUp. This is set to two minutes, but you can change this by altering the value of the device code constant *BLE_ACTIVE_TIME_AFTER_BOOT*. Following a Squirrel restart, BLE BlinkUp is always available for this period, as is your application. At the end of this period, BLE BlinkUp is disabled. If the mobile app connects to the device, the timeout timer is halted to allow WiFi credentials to be sent in full.
+
+This approach ensures that devices can easily recover from being passed bad WiFi credentials without the need to perform an optical BlinkUp: just reboot the device and set new credentials by BLE.
+
 ## Using the iOS App ##
 
 When the iOS app has launched, you may be required to authorize the app to use Bluetooth &mdash; please do so. Please also enter your BlinkUp API key when prompted *(see above)*.
@@ -72,6 +78,12 @@ The easiest approach to dealing with this is to disable then re-enable Bluetooth
 
 ## Release Notes ##
 
+- 1.4.0
+    - Add a Squirrel timer to manage BLE state, rather than rely on whether credentials have been applied.
+        - If bad credentials are supplied, this allows recovery by rebooting.
+    - Update dependencies:
+        - JQuery -> 3.6.0
+        - Rocky -> 3.0.1
 - 1.3.1
     - Update dependencies:
         - JQuery -> 3.4.1
@@ -109,4 +121,4 @@ This sample Squirrel and iOS application code is made available under the MIT Li
 
 The BlinkUp SDK is licensed separately and is not available under an open source license.
 
-Copyright © 2017-19, Electric Imp, Inc.
+Copyright © 2021, Twilio.

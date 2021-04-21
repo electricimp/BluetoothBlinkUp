@@ -1,9 +1,9 @@
 //  ------------------------------------------------------------------------------
 //  File: blinkup.device.nut
 //
-//  Version: 1.3.1
+//  Version: 1.4.0
 //
-//  Copyright 2017-19 Electric Imp
+//  Copyright 2021 Twilio
 //
 //  SPDX-License-Identifier: MIT
 //
@@ -26,9 +26,34 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //  ------------------------------------------------------------------------------
 
-// IMPORTS
+/*
+ * IMPORTS
+ */
 #require "bt_firmware.lib.nut:1.0.0"
 #require "btleblinkup.device.lib.nut:2.0.0"
+
+/*
+ * EARLY RUN CODE
+ */
+// Prevent the imp sleeping on connection error
+server.setsendtimeoutpolicy(RETURN_ON_ERROR, WAIT_TIL_SENT, 10);
+
+/*
+ * GLOBALS
+ */
+local bt = null;
+local agentTimer = null;
+local bleTimer = null;
+
+/*
+ * CONSTANTS
+ */
+// Post-boot BLE activate duration in seconds
+const BLE_ACTIVE_TIME_AFTER_BOOT = 120;
+
+/*
+ * FUNCTIONS
+ */
 
 // Set the GATT service UUIDs we wil use
 function initUUIDs() {
@@ -44,39 +69,13 @@ function initUUIDs() {
     return uuids;
 }
 
-// Prevent the imp sleeping on connection error
-server.setsendtimeoutpolicy(RETURN_ON_ERROR, WAIT_TIL_SENT, 10);
-
-local bt = null;
-local agentTimer = null;
-
-// Register a handler that will clear the configuration marker
-// in the imp SPI flash in response to a message from the agent.
-// This is present to aid testing: by clearing the signature and rebooting,
-// you put the imp back into its pre-activation state
-agent.on("clear.spiflash", function(data) {
-    // Clear the SPI flash signature for debugging
-    hardware.spiflash.enable();
-    hardware.spiflash.erasesector(0x0000);
-    server.log("Spiflash cleared");
-});
-
-// Register a handler that will restart the device
-agent.on("do.restart", function(data) {
-    if ("reset" in imp) {
-        imp.reset();
-    } else {
-        server.restart();
-    }
-});
-
 // This is a dummy function representing the application code flow.
 // In real-world code, this would deliver the product’s day-to-day
 // functionality, connection management and error handling code
 function startApplication() {
     // Application code starts here
     server.log("Application starting...");
-    server.log("Use the agent to reset device state");
+    server.log("Use the agent to restart the device, if required");
 }
 
 // This function defines this app's activation flow: preparing the device
@@ -84,6 +83,7 @@ function startApplication() {
 // local WiFi network settings.
 function startBluetooth() {
     // Instantiate the BTLEBlinkUp library
+    iType <- imp.info().type;
     bt = BTLEBlinkUp(initUUIDs(), (iType == "imp004m" ? BT_FIRMWARE.CYW_43438 : BT_FIRMWARE.CYW_43455));
 
     // Set security level for demo
@@ -121,49 +121,60 @@ function doBluetooth(agentURL = null) {
     // Store the agent URL if present
     if (agentURL != null) bt.agentURL = agentURL;
 
+    // FROM 1.4.0
+    // Trap connections
+    bt.onConnect(function(data) {
+        if ("state" in data && data.state == "connected") {
+            // A mobile app has connected to the device using the BLE BlinkUp service,
+            // so suspend the BLE BlinkUp active period timer if it's in place
+            imp.cancelwakeup(bleTimer);
+        }
+    }.bindenv(this));
+
     // Set the device up to listen for BlinkUp data
     bt.listenForBlinkUp(null, function(data) {
         // This is the callback through which the BLE sub-system communicates
         // with the host app, eg. to inform it activation has taken place
         if ("address" in data) server.log("Device " + data.address + " has " + data.state);
         if ("security" in data) server.log("Connection security mode: " + data.security);
-        if ("activated" in data && "spiflash" in hardware && (iType == "imp004m" || iType == "imp006" || iType == "impC001")) {
-            // Write BlinkUp signature post-configuration
-            hardware.spiflash.enable();
-            local ok = hardware.spiflash.write(0x0000, "\xC3\xC3\xC3\xC3", SPIFLASH_PREVERIFY);
-            if (ok != 0) server.error("SPIflash write failed");
-        }
     }.bindenv(this));
 
-    server.log("Bluetooth LE listening for BlinkUp...");
+    // FROM 1.4.0
+    // Set a post-boot period during which BLE BlinkUp services are available
+    if (bleTimer != null) imp.cancelwakeup(bleTimer);
+    bleTimer = imp.wakeup(BLE_ACTIVE_TIME_AFTER_BOOT, function() {
+        // Turn off BLE so that the device is no longer advertising its presence
+        bt.ble.close();
+        server.log("BLE BlinkUp no longer available - restart the device to re-enable.");
+    });
+
+    server.log("BLE BlinkUp active for " + BLE_ACTIVE_TIME_AFTER_BOOT + " seconds...");
 }
 
-// RUNTIME START
+/*
+ * RUNTIME START
+ */
 
-// Start by checking the imp SPI flash for a signature
-// If it is present (it is four bytes of 0xC3 each), the code
-// jumps to the application flow; otherwise we run the activation
-// flow, ie. set up and run Bluetooth LE
-iType <- imp.info().type;
-if ("spiflash" in hardware && (iType == "imp004m" || iType == "imp006" || iType == "impC001")) {
-    // Read the first four bytes of the SPI flash
-    hardware.spiflash.enable();
-    local bytes = hardware.spiflash.read(0x0000, 4);
-    local check = 0;
-
-    // Are the bytes all 0xC3?
-    foreach (byte in bytes) {
-        if (byte == 0xC3) check++;
-    }
-
-    if (check >= 4) {
-        // Device is activated so go to application code
-        startApplication();
+// Register a handler that will restart the device.
+// This is triggered via the agent-served UI
+agent.on("do.restart", function(data) {
+    if ("reset" in imp) {
+        imp.reset();
     } else {
-        // Device is not activated so bring up Bluetooth LE
-        startBluetooth();
+        server.restart();
     }
-} else {
-    // Unsupported imp: just start the app anyway to ignore Bluetooth
-    startApplication();
-}
+});
+
+// FROM 1.4.0
+// To prevent bad credentials from preventing not only the imp from reconnecting
+// but also from BLE BlinkUp being made available after boot, we now no longer check
+// SPI flash for a BlinkUp signature. Instead we start BLE *and* the application,
+// but specify a period (the value of 'BLE_ACTIVE_TIME_AFTER_BOOT', applied in
+// 'doBluetooth()') during which BLE BlinkUp is available after a Squirrel restart.
+// When this period ends, BLE is closed (see 'doBluetooth()').
+
+// At each Squirrel start, start BLE for BlinkUp
+startBluetooth();
+
+// Start the application
+startApplication();

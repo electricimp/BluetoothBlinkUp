@@ -1,9 +1,9 @@
 //  ------------------------------------------------------------------------------
 //  File: blinkup.agent.nut
 //
-//  Version: 1.3.1
+//  Version: 1.4.0
 //
-//  Copyright 2017-19 Electric Imp
+//  Copyright 2021 Twilio
 //
 //  SPDX-License-Identifier: MIT
 //
@@ -33,7 +33,7 @@
 // the device into its pre-activation state, ie. ready for BlinkUp.
 
 // IMPORTS
-#require "Rocky.agent.lib.nut:3.0.0"
+#require "Rocky.agent.lib.nut:3.0.1"
 
 // CONSTANTS
 const HTML_STRING = @"<!DOCTYPE html><html lang='en-US'><meta charset='UTF-8'>
@@ -82,19 +82,15 @@ const HTML_STRING = @"<!DOCTYPE html><html lang='en-US'><meta charset='UTF-8'>
                     <h4 class='readout-state'>Agent Status: online</h4>
                 </div>
                 <p>&nbsp;</p>
-                <div class='clear-button' align='center'>
-                    <button type='button' class='btn btn-secondary' id='clearer' style='height:48px;width:200px'>Clear BlinkUp Signature</button>
-                </div>
-                &nbsp;
                 <div class='reset-button' align='center'>
                     <button type='button' class='btn btn-secondary' id='restarter' style='height:48px;width:200px'>Restart Device</button>
                 </div>
                 <p>&nbsp;</p>
-                <p class='colophon'>BlinkUp Demo &copy; Electric Imp, Inc. 2017-19</p>
+                <p class='colophon'>BlinkUp Demo &copy; 2021, Twilio</p>
             </div>
         </div>
 
-        <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
+        <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
         <script>
             // Variables
             var agenturl = '%s';
