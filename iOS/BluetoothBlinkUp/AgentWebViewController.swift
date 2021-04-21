@@ -6,9 +6,9 @@
 //
 //  MIT License
 //
-//  Copyright 2017-19 Electric Imp
+//  Copyright 2021 Twilio
 //
-//  Version 1.3.1
+//  Version 1.4.0
 //
 //  SPDX-License-Identifier: MIT
 //
