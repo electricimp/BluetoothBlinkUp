@@ -30,7 +30,8 @@
  * IMPORTS
  */
 #require "bt_firmware.lib.nut:1.0.0"
-#require "btleblinkup.device.lib.nut:2.0.0"
+//#require "btleblinkup.device.lib.nut:2.0.0"
+#import "/Users/tsmith/GitHub/BTLEBlinkUp/btleblinkup.device.lib.nut"
 
 /*
  * EARLY RUN CODE
@@ -82,9 +83,10 @@ function startApplication() {
 // for enrollment into the Electric Imp impCloud and applying the end-user's
 // local WiFi network settings.
 function startBluetooth() {
-    // Instantiate the BTLEBlinkUp library
+    // Instantiate the BTLEBlinkUp library for the imp type
+    // NOTE From impOS 42, imp006 doesn't need to be passed firmware
     iType <- imp.info().type;
-    bt = BTLEBlinkUp(initUUIDs(), (iType == "imp004m" ? BT_FIRMWARE.CYW_43438 : BT_FIRMWARE.CYW_43455));
+    bt = (iType == "imp004m" ? BTLEBlinkUp(initUUIDs(), BT_FIRMWARE.CYW_43438) : BTLEBlinkUp(initUUIDs()));
 
     // Set security level for demo
     bt.setSecurity(1);
@@ -111,6 +113,12 @@ function startBluetooth() {
     }.bindenv(this));
 }
 
+function disableBlinkup() {
+    // Turn off BLE so that the device is no longer advertising its presence
+    bt.ble.close();
+    server.log("BLE BlinkUp no longer available - restart the device to re-enable.");
+}
+
 function doBluetooth(agentURL = null) {
     // If we didn't call this from the timer, clear the timer
     if (agentTimer != null) {
@@ -121,33 +129,32 @@ function doBluetooth(agentURL = null) {
     // Store the agent URL if present
     if (agentURL != null) bt.agentURL = agentURL;
 
-    // FROM 1.4.0
-    // Trap connections
-    bt.onConnect(function(data) {
-        if ("state" in data && data.state == "connected") {
-            // A mobile app has connected to the device using the BLE BlinkUp service,
-            // so suspend the BLE BlinkUp active period timer if it's in place
-            imp.cancelwakeup(bleTimer);
-        }
-    }.bindenv(this));
-
     // Set the device up to listen for BlinkUp data
     bt.listenForBlinkUp(null, function(data) {
         // This is the callback through which the BLE sub-system communicates
         // with the host app, eg. to inform it activation has taken place
         if ("address" in data) server.log("Device " + data.address + " has " + data.state);
         if ("security" in data) server.log("Connection security mode: " + data.security);
+
+        // FROM 1.4.0
+        // Access GATT events and delay the BlinkUp active period timer
+        // when credentials are being set
+        if ("gatt" in data) {
+            server.log(data.gatt.service + ", " + data.gatt.characteristic);
+
+            if (data.gatt.characteristic == "5EBA195632D347C681A6A7E59F18DAC0") {
+                // The GATT BlinkUp SSID setter characteristic was accessed
+                server.log("WiFi credentials being set -- extending BlinkUp timer by 60 seconds.");
+                if (bleTimer != null) imp.cancelwakeup(bleTimer);
+                bleTimer = imp.wakeup(60, disableBlinkup);
+            }
+        }
     }.bindenv(this));
 
     // FROM 1.4.0
     // Set a post-boot period during which BLE BlinkUp services are available
     if (bleTimer != null) imp.cancelwakeup(bleTimer);
-    bleTimer = imp.wakeup(BLE_ACTIVE_TIME_AFTER_BOOT, function() {
-        // Turn off BLE so that the device is no longer advertising its presence
-        bt.ble.close();
-        server.log("BLE BlinkUp no longer available - restart the device to re-enable.");
-    });
-
+    bleTimer = imp.wakeup(BLE_ACTIVE_TIME_AFTER_BOOT, disableBlinkup);
     server.log("BLE BlinkUp active for " + BLE_ACTIVE_TIME_AFTER_BOOT + " seconds...");
 }
 

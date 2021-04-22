@@ -32,6 +32,8 @@ In order to build the app, you will need the [iOS BlinkUp SDK](https://developer
 
 ## Building the Squirrel App ##
 
+**Note** The Squirrel app requires version 2.1.0 of the [BTLEBlinkUp library](https://github.com/electricimp/BTLEBlinkUp).
+
 Log into [impCentral™](https://impcentral.electricimp.com/login) in a browser on your computer. Using the Electric Imp mobile app, first add the Breakout Board to your account. Now select an existing Product and create a new Development Device Group, or create a new Product. Creating a new Development Device Group will take you to impCentral’s code editor: paste the accompanying Squirrel source code into the code editor’s agent (`blinkup.agent.nut`) and device code (`blinkup.device.nut`) panes. Now click **Build and Force Restart**.
 
 Next, click **Assign devices**, toward the bottom the screen. Use the panel that appears to assign your Breakout Board to the new Development Device Group. Power up the Breakout Board if it is not powered up already. The Breakout Board will now receive and run the device code, and the agent will be instantiated in the cloud.
