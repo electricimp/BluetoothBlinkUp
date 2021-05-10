@@ -113,9 +113,9 @@ function startBluetooth() {
     }.bindenv(this));
 }
 
-function disableBlinkup() {
+function stopBlinkup() {
     // Turn off BLE so that the device is no longer advertising its presence
-    bt.ble.close();
+    bt.close();
     server.log("BLE BlinkUp no longer available - restart the device to re-enable.");
 }
 
@@ -146,7 +146,7 @@ function doBluetooth(agentURL = null) {
                 // The GATT BlinkUp SSID setter characteristic was accessed
                 server.log("WiFi credentials being set -- extending BlinkUp timer by 60 seconds.");
                 if (bleTimer != null) imp.cancelwakeup(bleTimer);
-                bleTimer = imp.wakeup(60, disableBlinkup);
+                bleTimer = imp.wakeup(60, stopBlinkup);
             }
         }
     }.bindenv(this));
@@ -154,7 +154,7 @@ function doBluetooth(agentURL = null) {
     // FROM 1.4.0
     // Set a post-boot period during which BLE BlinkUp services are available
     if (bleTimer != null) imp.cancelwakeup(bleTimer);
-    bleTimer = imp.wakeup(BLE_ACTIVE_TIME_AFTER_BOOT, disableBlinkup);
+    bleTimer = imp.wakeup(BLE_ACTIVE_TIME_AFTER_BOOT, stopBlinkup);
     server.log("BLE BlinkUp active for " + BLE_ACTIVE_TIME_AFTER_BOOT + " seconds...");
 }
 
