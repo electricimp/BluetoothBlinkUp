@@ -3,7 +3,7 @@
 //
 //  Version: 1.4.0
 //
-//  Copyright 2021 Twilio
+//  Copyright 2021-23 KORE Wireless
 //
 //  SPDX-License-Identifier: MIT
 //
@@ -30,7 +30,7 @@
  * IMPORTS
  */
 #require "bt_firmware.lib.nut:1.0.0"
-//#require "btleblinkup.device.lib.nut:2.0.0"
+//#require "btleblinkup.device.lib.nut:2.1.0"
 #import "/Users/tsmith/GitHub/BTLEBlinkUp/btleblinkup.device.lib.nut"
 
 /*
@@ -115,6 +115,7 @@ function startBluetooth() {
 
 function stopBlinkup() {
     // Turn off BLE so that the device is no longer advertising its presence
+    // Requires `BTLEBlinkUp.device.lib.nut:2.1.0`
     bt.close();
     server.log("BLE BlinkUp no longer available - restart the device to re-enable.");
 }

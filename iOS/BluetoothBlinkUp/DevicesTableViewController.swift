@@ -6,7 +6,7 @@
 //
 //  MIT License
 //
-//  Copyright 2021 Twilio
+//  Copyright 2021-23 KORE Wireless
 //
 //  Version 1.4.0
 //
@@ -116,7 +116,7 @@ class DevicesTableViewController: UITableViewController, CBCentralManagerDelegat
 
         // Set up the refresh control - the searching indicator
         self.refreshControl = UIRefreshControl.init()
-        
+
         // FROM 1.2.1
         // Check for iOS 13 to support dark mode
         if #available(iOS 13.0, *) {
@@ -127,7 +127,7 @@ class DevicesTableViewController: UITableViewController, CBCentralManagerDelegat
                                                                 blue: 0.9,
                                                                 alpha: 1.0)
         }
-        
+
         self.refreshControl!.tintColor = UIColor.init(red: 0.03, green: 0.66, blue: 0.66, alpha: 1.0)
         self.refreshControl!.attributedTitle = NSAttributedString.init(string: "Searching for Bluetooth-enabled imps...",
                                                                        attributes: [ NSAttributedString.Key.foregroundColor : UIColor.black ])
@@ -747,7 +747,7 @@ class DevicesTableViewController: UITableViewController, CBCentralManagerDelegat
                                                     encoding: String.Encoding.utf8)!
                         if aDevice.agent == "TBD" { aDevice.agent = "Agent not yet initialized"; }
                         self.devicesTable.reloadData()
-                        
+
                         // Now get the OS VERSION characteristic
                         for i in 0..<aDevice.characteristics.count {
                             let ch:CBCharacteristic? = aDevice.characteristics[i]
@@ -766,7 +766,7 @@ class DevicesTableViewController: UITableViewController, CBCentralManagerDelegat
                     peripheral.readValue(for: characteristic)
                 }
             }
-            
+
         } else if characteristic.uuid.uuidString == DEVICE_INFO_OSVER_CHARACTERISTIC_UUID {
             if let data = characteristic.value {
                 if data.count > 0 {

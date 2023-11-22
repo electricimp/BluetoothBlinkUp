@@ -3,7 +3,7 @@
 //
 //  Version: 1.4.0
 //
-//  Copyright 2021 Twilio
+//  Copyright 2021-23 KORE Wireless
 //
 //  SPDX-License-Identifier: MIT
 //
@@ -41,8 +41,8 @@ const HTML_STRING = @"<!DOCTYPE html><html lang='en-US'><meta charset='UTF-8'>
     <head>
         <title>Electric Imp BlinkUp™ Demo</title>
         <link rel='stylesheet' href='https://netdna.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css'>
+        <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css' integrity='sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N' crossorigin='anonymous'>
         <link href='https://fonts.googleapis.com/css?family=Abel' rel='stylesheet'>
-        <link rel='shortcut icon' href='https://smittytone.github.io/images/ico-imp.ico'>
         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
         <style>
             body {background-color: #25ABDC;}
@@ -86,11 +86,11 @@ const HTML_STRING = @"<!DOCTYPE html><html lang='en-US'><meta charset='UTF-8'>
                     <button type='button' class='btn btn-secondary' id='restarter' style='height:48px;width:200px'>Restart Device</button>
                 </div>
                 <p>&nbsp;</p>
-                <p class='colophon'>BlinkUp Demo &copy; 2021, Twilio</p>
+                <p class='colophon'>BlinkUp Demo &copy; 2021-23, KORE Wireless</p>
             </div>
         </div>
 
-        <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+        <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js'></script>
         <script>
             // Variables
             var agenturl = '%s';

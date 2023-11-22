@@ -6,7 +6,7 @@
 //
 //  MIT License
 //
-//  Copyright 2021 Twilio
+//  Copyright 2021-23 KORE Wireless
 //
 //  Version 1.4.0
 //
@@ -59,7 +59,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
     var agentURL: String!
     var scanTimer: Timer!
     var cheatTimer: Timer!
-    
+
     // Constants
     let DEVICE_SCAN_TIMEOUT = 5.0
     let CANCEL_TIME = 3.0
@@ -71,7 +71,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
     let BLINKUP_TRIGGER_UUID = "F299C342-8A8A-4544-AC42-08C841737B1B"
     let WIFI_GETTER_UUID = "57A9ED95-ADD5-4913-8494-57759B79A46C"
     let WIFI_CLEAR_TRIGGER_UUID = "2BE5DDBA-3286-4D09-A652-F24FAA514AF5"
-    
+
 
     // MARK: - View Lifecycle Functions
 
@@ -96,11 +96,11 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
                                                object: nil)
     }
 
-    
+
     override func viewWillAppear(_ animated: Bool) {
 
         super.viewWillAppear(animated)
-        
+
         // FROM 1.2.1
         // If we're returning from the web view, go direct to the device list
         if self.isShowingWebview {
@@ -108,19 +108,19 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
             goBack()
             return
         }
-        
+
         initNetworks()
         connectToDevice()
     }
-    
-    
+
+
     @objc func connectToDevice() {
-        
+
         // App is about to come back into view after the user previously
         // switched to a different app, so reset the UI - unless we're sending
         if !self.isSending {
             initUI()
-        
+
             // Get the networks from the device
             if let aDevice: Device = device {
                 // NOTE We need to set the objects' delegates to 'self' so that the correct delegate functions are called
@@ -141,15 +141,15 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         }
     }
 
-    
+
     override func viewDidAppear(_ animated: Bool) {
 
         super.viewDidAppear(animated)
     }
-    
-    
+
+
     @objc func endConnectWithAlert() {
-        
+
         // This function is called when 'scanTimer' fires. This event indicates that
         // the device failed to connect for some reason - so report it to the user
         if let aDevice: Device = device {
@@ -157,13 +157,13 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
             self.connected = false
             showDisconnectAlert("Could not connect to \"\(aDevice.name)\"", "Please go back to the devices list and re-select \"\(aDevice.name)\", if necessary performing a new scan, or clear its SPI flash signature using the Web UI to re-enable Bluetooth BlinkUp")
         }
-        
+
         self.isClearing = false
         self.isSending = false
         self.blinkUpProgressBar.stopAnimating()
     }
-    
-    
+
+
     func initUI() {
 
         // Initialise the UI
@@ -172,7 +172,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         self.sendLabel.text = ""
     }
 
-    
+
     func initNetworks() {
 
         // Initialize the UIPickerView which presents the network list
@@ -189,7 +189,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         self.wifiPicker.isUserInteractionEnabled = true
     }
 
-    
+
     @objc func goBack() {
 
         // Return to the device list - unless we are sending data ('isSending' is true),
@@ -240,7 +240,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
             self.showAlert("There are no networks to connect to", "")
             return
         }
-        
+
         // Check whether the user has entered a BlinkUp API Key
         if self.harvey.count == 0 {
             // No API key has been entered so post a warning, and give the user
@@ -248,18 +248,18 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
             let alert = UIAlertController.init(title: "Device Activation Requires A BlinkUp™ API key",
                                                message: "Without entering a BlinkUp API Key, you will only be able to send WiFi credentials to an already activated device. To activate devices, please tap ‘Cancel’, go back to the device list, tap ‘Actions’ and select ‘Enter Your BlinkUp API Key’",
                                                preferredStyle: UIAlertController.Style.alert)
-            
+
             alert.addAction(UIAlertAction(title: "OK",
                                           style: UIAlertAction.Style.default,
                                           handler: { (action) in
                                             // User has clicked OK, so go to step two
                                             self.blinkupStageTwo()
             }))
-            
+
             alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""),
                                           style: UIAlertAction.Style.cancel,
                                           handler: nil))
-            
+
             self.present(alert,
                          animated: true,
                          completion: nil)
@@ -268,16 +268,16 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
             blinkupStageTwo()
         }
     }
-    
-    
+
+
     func blinkupStageTwo() {
-        
+
         // Step two of the pre-BlinkUp process
         // NOTE This is a separate function because it may be called from multple code paths
-        
+
         // Start the indicator
         self.blinkUpProgressBar.startAnimating()
-        
+
         // Are we already connected to the device?
         if !self.connected {
             // App is not connected to the device, so connect now
@@ -287,7 +287,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
                                               options: nil)
                 // Pick up the action at didConnect(), which is called when the
                 // iDevice has connected to the imp004m
-                
+
                 // Set up a timeout
                 self.scanTimer = Timer.scheduledTimer(timeInterval: DEVICE_SCAN_TIMEOUT,
                                                       target: self,
@@ -301,8 +301,8 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
             blinkupStageThree()
         }
     }
-    
-    
+
+
     func blinkupStageThree() {
 
         // Use the BlinkUp SDK to retrieve an enrollment token and a plan ID from the user's API Key
@@ -312,7 +312,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
 
         self.isSending = true
         if self.scanTimer.isValid { self.scanTimer.invalidate() }
-        
+
         // NOTE The progress indicator is already active at this point
         if self.connected {
             // We're good to proceed so begin BlinkUp
@@ -339,7 +339,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
                             // Clean up the UI
                             self.sendLabel.text = ""
                             self.blinkUpProgressBar.stopAnimating()
-                            
+
                             // Instantiate and show a webview containing the agent-served UI
                             // TODO Incorporate a check to load the agent-served string and check that
                             //      it is valid HTML before loading
@@ -380,7 +380,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
                             poller.startPollingWithHandler({ (response) in
                                 self.sendLabel.text = ""
                                 self.blinkUpProgressBar.stopAnimating()
-                                
+
                                 switch(response) {
                                 case .responded(let info):
                                     // The server indicates that the device has enrolled successfully, so we're done
@@ -429,7 +429,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         }
     }
 
-    
+
     func sendEnrolData(_ device: Device, _ config: BUConfigId) {
 
         // Package up the enrolment data and send it to the device
@@ -478,7 +478,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         }
     }
 
-    
+
     func sendWiFiData(_ device: Device) {
 
         // Package up the WiFi configuration information and send it to the device
@@ -489,7 +489,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         let ssidData:Data? = network[0].data(using: String.Encoding.utf8)
         let pwdData:Data? = self.passwordField.text!.data(using: String.Encoding.utf8)
         NSLog("Sending SSID (\(network[0])) and password (\(self.passwordField.text!))")
-        
+
         // Work through the characteristic list for the service, to match them
         //  to known UUIDs so we send the correct data to the device
         for i in 0..<device.characteristics.count {
@@ -539,7 +539,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         }
     }
 
-    
+
     @IBAction func clearWiFi(_ sender: Any) {
 
         // Already sending or connecting in order to clear? Then bail
@@ -559,7 +559,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
                                               options: nil)
                 // Pick up the action at didConnect(), which is called when the
                 // iDevice has connected to the imp
-                
+
                 // Set up a timeout
                 self.scanTimer = Timer.scheduledTimer(timeInterval: DEVICE_SCAN_TIMEOUT,
                                                       target: self,
@@ -573,7 +573,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         }
     }
 
-    
+
     func clearWiFiStageTwo() {
 
         self.isClearing = false
@@ -599,7 +599,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
                             // Since we can't poll the server for this instance (we have no API key), we
                             // just warn the user via an alert to expect the device to connect
                             showAlert("imp WiFi Cleared", "Your imp’s WiFi credentials have been cleared")
-                            
+
                             // Close the connection in CANCEL_TIME seconds' time
                             self.cheatTimer = Timer.scheduledTimer(withTimeInterval: self.CANCEL_TIME,
                                                                    repeats: false,
@@ -621,9 +621,9 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         self.blinkUpProgressBar.stopAnimating()
     }
 
-    
+
     func showWebview(_ agentURL: String) {
-        
+
         // FROM 1.2.1
         // Refactor this code into a function
         let storyboard = UIStoryboard.init(name:"Main",
@@ -646,14 +646,14 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
                          action: #selector(awvc.goBack),
                          for: UIControl.Event.touchUpInside)
         awvc.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: button)
-        
+
         // Show the web view
         self.isShowingWebview = true
         self.navigationController!.pushViewController(awvc,
                                                       animated: true)
     }
-    
-    
+
+
     // MARK: - Utility Functions
 
     func showAlert(_ title: String, _ message: String) {
@@ -667,8 +667,8 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
                      animated: true,
                      completion: nil)
     }
-    
-    
+
+
     func showDisconnectAlert(_ title: String, _ message: String) {
         let alert = UIAlertController.init(title: title,
                                            message: message,
@@ -683,7 +683,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
                         self.clearList = true }
     }
 
-    
+
     @objc @IBAction func showPassword(_ sender: Any) {
 
         // Show or hide the password characters by flipping this flag
@@ -720,7 +720,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         }
     }
 
-    
+
     func centralManager(_ central: CBCentralManager, didFailToConnect: CBPeripheral, error: Error?) {
 
         self.connected = false
@@ -735,7 +735,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         }
     }
 
-    
+
     func centralManager(_ central: CBCentralManager, didDisconnect: CBPeripheral, error: Error?) {
 
         self.connected = false
@@ -749,7 +749,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         }
     }
 
-    
+
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         // NOP
     }
@@ -789,7 +789,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         } else {
             self.bluetoothManager.cancelPeripheralConnection(peripheral)
             self.connected = false
-            
+
             var deviceName: String = "Unknown"
             if let d = peripheral.name { deviceName = d }
 
@@ -801,7 +801,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         }
     }
 
-    
+
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService,  error: Error?) {
 
         // The app has discovered the characteristics offered by the peripheral (ie. the imp004m) for
@@ -840,7 +840,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         }
     }
 
-    
+
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
 
         // We have successfully read the imp application's networks list characteristic, so use
@@ -894,7 +894,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
                     peripheral.readValue(for: characteristic)
                 }
             }
-            
+
             // Hide the progress indicator
             self.bluetoothManager.cancelPeripheralConnection(peripheral)
             self.connected = false
@@ -905,7 +905,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         }
     }
 
-    
+
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
 
         // This will be called when a value is written to the peripheral via GATT
@@ -928,20 +928,20 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         return 1;
     }
 
-    
+
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
 
         // Return the number of entries in the 'availableNetworks' array
         return self.availableNetworks.count;
     }
 
-    
+
     func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
 
         return 28
     }
 
-    
+
     func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
 
         // Return the element from 'availableNetworks' whose index matches 'row'
@@ -982,7 +982,7 @@ class DeviceDetailViewController: UIViewController, CBCentralManagerDelegate, CB
         }
     }
 
-    
+
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
 
         textField.resignFirstResponder()

@@ -86,7 +86,7 @@ The easiest approach to dealing with this is to disable then re-enable BLE on yo
     - Add a Squirrel timer to manage BLE state, rather than rely on whether credentials have been applied.
         - If bad credentials are supplied, this allows recovery by rebooting.
     - Update dependencies:
-        - JQuery -> 3.6.0
+        - JQuery -> 3.7.1
         - Rocky -> 3.0.1
 - 1.3.1
     - Update dependencies:
@@ -125,4 +125,4 @@ This sample Squirrel and iOS application code is made available under the MIT Li
 
 The BlinkUp SDK is licensed separately and is not available under an open source license.
 
-Copyright © 2021, Twilio.
+Copyright © 2021-23, KORE Wireless.

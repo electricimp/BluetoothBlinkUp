@@ -6,7 +6,7 @@
 //
 //  MIT License
 //
-//  Copyright 2021 Twilio
+//  Copyright 2021-23 KORE Wireless
 //
 //  Version 1.4.0
 //
@@ -155,5 +155,5 @@ class AgentWebViewController: UIViewController, WKNavigationDelegate {
         // Couldn't load the page, so return an empty string
         return ""
     }
-    
+
 }
