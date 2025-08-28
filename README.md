@@ -1,4 +1,4 @@
-# Bluetooth BlinkUp 1.3.1 #
+# Bluetooth BlinkUp 1.3.2 #
 
 This example comprises Squirrel code for you to run on an imp-based test device &mdash; this requires impOS™ 38 or above &mdash; and an Xcode project which you can use to build an iOS app (written in Swift 4) that is capable of finding and configuring test devices running the Squirrel code.
 
@@ -71,7 +71,9 @@ By default, iOS caches the attribute information it discovers from devices, as d
 The easiest approach to dealing with this is to disable then re-enable Bluetooth on your Apple device &mdash; try switching to Airplane mode and then back again. You may also need to power-cycle the device.
 
 ## Release Notes ##
-
+- 1.3.2
+    - Updated library version of btleblinkup.device.lib.nut to 2.0.1:
+        - 
 - 1.3.1
     - Update dependencies:
         - JQuery -> 3.4.1
